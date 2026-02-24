@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VoiceInsight — Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#f0f4ff', 100:'#dce8ff', 500:'#4169e1', 600:'#3457c8', 700:'#2a45a8' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #app {
+      width: 100%;
+      max-width: 390px;
+      height: 100vh;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 390px) {
+      #app { box-shadow: none; }
+      body { background: #f9fafb; }
+    }
+    #content-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #content-scroll::-webkit-scrollbar { display: none; }
+    .settings-section { margin-bottom: 1rem; }
+    .settings-group {
+      background: white;
+      border-radius: 0.875rem;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 1rem;
+    }
+    .settings-group-title {
+      background: #f9fafb;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .settings-item {
+      padding: 1rem;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+    .settings-label {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .settings-label-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #1f2937;
+    }
+    .settings-label-hint {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    .settings-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    select, input[type="text"], input[type="password"] {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+    select:focus, input:focus {
+      outline: none;
+      border-color: #4169e1;
+      box-shadow: 0 0 0 3px rgba(65,105,225,0.12);
+    }
+    .btn-small {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .btn-small:hover {
+      background: #f9fafb;
+    }
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      background: #d1d5db;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle.active {
+      background: #4169e1;
+    }
+    .toggle-switch {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: left 0.2s;
+    }
+    .toggle.active .toggle-switch {
+      left: 24px;
+    }
+    .info-box {
+      background: #f0f4ff;
+      border: 1px solid #dce8ff;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #4169e1;
+      display: flex;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Status bar spacer -->
+  <div class="h-10 bg-white flex-shrink-0"></div>
+
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-100 px-4 py-4 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <a href="dashboard.html" class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <h1 class="text-lg font-bold text-gray-800">Settings</h1>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content-scroll" class="px-4 py-4">
+
+    <!-- AI & Language Processing -->
+    <div class="settings-group">
+      <div class="settings-group-title">AI & Language Processing</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Transcription Provider</div>
+          <div class="settings-label-hint">Speech-to-text service</div>
+        </div>
+        <select class="settings-control">
+          <option>OpenAI Whisper</option>
+          <option>Google Cloud</option>
+          <option>Anthropic</option>
+          <option>AssemblyAI</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Language</div>
+          <div class="settings-label-hint">Auto-detect or select</div>
+        </div>
+        <select class="settings-control">
+          <option>Auto-detect</option>
+          <option>English (US)</option>
+          <option>English (UK)</option>
+          <option>Spanish</option>
+          <option>French</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Summary AI Model</div>
+          <div class="settings-label-hint">For text summarization</div>
+        </div>
+        <select class="settings-control">
+          <option>GPT-4</option>
+          <option>GPT-3.5-turbo</option>
+          <option>Claude 3 Opus</option>
+          <option>Claude 3 Sonnet</option>
+          <option>Gemini Pro</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Summary Detail Level</div>
+          <div class="settings-label-hint">1-5 paragraphs</div>
+        </div>
+        <select class="settings-control">
+          <option>Brief</option>
+          <option>Standard</option>
+          <option>Detailed</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Key Points Count</div>
+          <div class="settings-label-hint">How many to extract</div>
+        </div>
+        <select class="settings-control">
+          <option>Few (3-5)</option>
+          <option>Standard (5-8)</option>
+          <option>Comprehensive (8-12)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- API Keys & Credentials -->
+    <div class="settings-group">
+      <div class="settings-group-title">API Keys & Credentials</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">OpenAI API Key</div>
+          <div class="settings-label-hint" id="openai-status">Not configured</div>
+          <div class="info-box">
+            ℹ️ <span>Get key from <a href="https://platform.openai.com/keys" target="_blank" style="color: #4169e1; text-decoration: underline;">platform.openai.com/keys</a></span>
+          </div>
+        </div>
+        <button class="btn-small" onclick="editApiKey('openai')">Edit</button>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Anthropic API Key</div>
+          <div class="settings-label-hint" id="anthropic-status">Not configured</div>
+          <div class="info-box">
+            ℹ️ <span>Get key from <a href="https://console.anthropic.com" target="_blank" style="color: #4169e1; text-decoration: underline;">console.anthropic.com</a></span>
+          </div>
+        </div>
+        <button class="btn-small" onclick="editApiKey('anthropic')">Edit</button>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Google Cloud API Key</div>
+          <div class="settings-label-hint" id="google-status">Not configured</div>
+          <div class="info-box">
+            ℹ️ <span>Set up at <a href="https://console.cloud.google.com" target="_blank" style="color: #4169e1; text-decoration: underline;">console.cloud.google.com</a></span>
+          </div>
+        </div>
+        <button class="btn-small" onclick="editApiKey('google')">Edit</button>
+      </div>
+    </div>
+
+    <!-- Recording Preferences -->
+    <div class="settings-group">
+      <div class="settings-group-title">Recording Preferences</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Recording Quality</div>
+          <div class="settings-label-hint">Sample rate (Hz)</div>
+        </div>
+        <select class="settings-control">
+          <option>8 kHz (Low)</option>
+          <option>16 kHz</option>
+          <option>44.1 kHz (High)</option>
+          <option>48 kHz (Very High)</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Audio Format</div>
+          <div class="settings-label-hint">File type</div>
+        </div>
+        <select class="settings-control">
+          <option>WAV (Lossless)</option>
+          <option>MP3 (Compressed)</option>
+          <option>WEBM</option>
+          <option>OGG</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Silence Detection</div>
+          <div class="settings-label-hint">Auto-stop on silence</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playback & Display -->
+    <div class="settings-group">
+      <div class="settings-group-title">Playback & Display</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Default Playback Speed</div>
+          <div class="settings-label-hint">When playing recordings</div>
+        </div>
+        <select class="settings-control">
+          <option>0.75x</option>
+          <option selected>1x (Normal)</option>
+          <option>1.25x</option>
+          <option>1.5x</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Transcript Font Size</div>
+          <div class="settings-label-hint">Text readability</div>
+        </div>
+        <select class="settings-control">
+          <option>Small</option>
+          <option selected>Medium</option>
+          <option>Large</option>
+          <option>Extra Large</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Show Timestamps</div>
+          <div class="settings-label-hint">In transcript</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Auto-scroll with Playback</div>
+          <div class="settings-label-hint">Keep current text visible</div>
+        </div>
+        <div class="toggle" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Highlight Current Speaker</div>
+          <div class="settings-label-hint">During playback</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data & Privacy -->
+    <div class="settings-group">
+      <div class="settings-group-title">Data & Privacy</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Auto-Delete Recordings</div>
+          <div class="settings-label-hint">Automatic cleanup</div>
+        </div>
+        <select class="settings-control">
+          <option selected>Keep Forever</option>
+          <option>30 Days</option>
+          <option>90 Days</option>
+          <option>1 Year</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Storage Location</div>
+          <div class="settings-label-hint">Where files are saved</div>
+        </div>
+        <select class="settings-control">
+          <option selected>Local Device Only</option>
+          <option>Cloud (Firebase)</option>
+          <option>Hybrid (Local + Cloud)</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Usage Analytics</div>
+          <div class="settings-label-hint">Help improve app</div>
+        </div>
+        <div class="toggle" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Crash Reporting</div>
+          <div class="settings-label-hint">Auto-send error logs</div>
+        </div>
+        <div class="toggle" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export & Backup -->
+    <div class="settings-group">
+      <div class="settings-group-title">Export & Backup</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Default Export Format</div>
+          <div class="settings-label-hint">When exporting transcripts</div>
+        </div>
+        <select class="settings-control">
+          <option>PDF</option>
+          <option selected>TXT</option>
+          <option>MARKDOWN</option>
+          <option>JSON</option>
+          <option>DOCX</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Auto Backup</div>
+          <div class="settings-label-hint">Frequency</div>
+        </div>
+        <select class="settings-control">
+          <option>Disabled</option>
+          <option>Daily</option>
+          <option selected>Weekly</option>
+          <option>Monthly</option>
+        </select>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Last Backup</div>
+          <div class="settings-label-hint">Feb 24, 2:34 PM</div>
+        </div>
+        <button class="btn-small" onclick="performBackup()">Backup Now</button>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-group">
+      <div class="settings-group-title">Notifications & Alerts</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Recording Started</div>
+          <div class="settings-label-hint">Notify when recording begins</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Processing Complete</div>
+          <div class="settings-label-hint">When AI is done</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Upload Failed</div>
+          <div class="settings-label-hint">On sync errors</div>
+        </div>
+        <div class="toggle active" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Daily Summary</div>
+          <div class="settings-label-hint">Stats from today</div>
+        </div>
+        <div class="toggle" onclick="toggleSetting(this)">
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About & Help -->
+    <div class="settings-group">
+      <div class="settings-group-title">About & Help</div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Version</div>
+          <div class="settings-label-hint">1.0.0 (Build 2026.024)</div>
+        </div>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-label">
+          <div class="settings-label-text">Check for Updates</div>
+          <div class="settings-label-hint">Latest version installed</div>
+        </div>
+        <button class="btn-small">Check</button>
+      </div>
+
+      <div class="settings-item">
+        <a href="#" class="settings-label hover:text-brand-500">
+          <div class="settings-label-text text-brand-500">Privacy Policy</div>
+        </a>
+      </div>
+
+      <div class="settings-item">
+        <a href="#" class="settings-label hover:text-brand-500">
+          <div class="settings-label-text text-brand-500">Terms of Service</div>
+        </a>
+      </div>
+
+      <div class="settings-item">
+        <a href="#" class="settings-label hover:text-brand-500">
+          <div class="settings-label-text text-brand-500">API Documentation</div>
+        </a>
+      </div>
+
+      <div class="settings-item">
+        <a href="#" class="settings-label hover:text-brand-500">
+          <div class="settings-label-text text-brand-500">Send Feedback</div>
+        </a>
+      </div>
+
+      <div class="settings-item">
+        <a href="#" class="settings-label hover:text-brand-500">
+          <div class="settings-label-text text-brand-500">Report a Bug</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Padding for bottom -->
+    <div style="height: 2rem;"></div>
+
+  </div>
+
+</div>
+
+<!-- API Key Modal (hidden) -->
+<div id="api-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
+  <div class="w-full bg-white rounded-t-3xl p-6 animate-slide-up">
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="modal-title" class="text-lg font-bold text-gray-800">OpenAI API Key</h2>
+      <button onclick="closeApiModal()" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+      <input id="api-key-input" type="password" placeholder="sk-..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" />
+    </div>
+
+    <div class="flex gap-3">
+      <button onclick="closeApiModal()" class="flex-1 py-2 border border-gray-200 rounded-lg text-gray-700 font-medium">
+        Cancel
+      </button>
+      <button onclick="saveApiKey()" class="flex-1 py-2 bg-brand-500 text-white rounded-lg font-medium active:scale-95">
+        Save
+      </button>
+    </div>
+
+    <div id="api-message" class="mt-3 text-sm text-gray-500"></div>
+  </div>
+</div>
+
+<script>
+  let currentProvider = null;
+
+  function toggleSetting(element) {
+    element.classList.toggle('active');
+  }
+
+  function editApiKey(provider) {
+    currentProvider = provider;
+    document.getElementById('modal-title').textContent =
+      provider === 'openai' ? 'OpenAI API Key' :
+      provider === 'anthropic' ? 'Anthropic API Key' :
+      'Google Cloud API Key';
+
+    // Load existing key if any
+    const stored = localStorage.getItem(`${provider}_api_key`);
+    document.getElementById('api-key-input').value = stored || '';
+    document.getElementById('api-key-input').type = 'password';
+    document.getElementById('api-message').textContent = '';
+
+    document.getElementById('api-modal').classList.remove('hidden');
+    document.getElementById('api-key-input').focus();
+  }
+
+  function closeApiModal() {
+    document.getElementById('api-modal').classList.add('hidden');
+    currentProvider = null;
+  }
+
+  function saveApiKey() {
+    const apiKey = document.getElementById('api-key-input').value.trim();
+
+    if (!apiKey) {
+      showMessage('Please enter an API key', 'error');
+      return;
+    }
+
+    if (apiKey.length < 20) {
+      showMessage('API key seems too short', 'error');
+      return;
+    }
+
+    // Validate (mock)
+    showMessage('Validating API key...', 'info');
+
+    setTimeout(() => {
+      // Store the key
+      localStorage.setItem(`${currentProvider}_api_key`, apiKey);
+
+      // Update status
+      const statusEl = document.getElementById(`${currentProvider}-status`);
+      statusEl.textContent = '✓ Configured';
+      statusEl.style.color = '#10b981';
+
+      showMessage('✓ API key saved and validated', 'success');
+
+      setTimeout(() => {
+        closeApiModal();
+      }, 1500);
+    }, 1000);
+  }
+
+  function showMessage(text, type) {
+    const messageEl = document.getElementById('api-message');
+    messageEl.textContent = text;
+    messageEl.style.color =
+      type === 'success' ? '#10b981' :
+      type === 'error' ? '#ef4444' :
+      '#6b7280';
+  }
+
+  function performBackup() {
+    alert('Backup initiated! Your recordings are being saved to cloud storage.');
+  }
+
+  // Load stored API keys on page load
+  window.addEventListener('load', () => {
+    ['openai', 'anthropic', 'google'].forEach(provider => {
+      if (localStorage.getItem(`${provider}_api_key`)) {
+        const statusEl = document.getElementById(`${provider}-status`);
+        statusEl.textContent = '✓ Configured';
+        statusEl.style.color = '#10b981';
+      }
+    });
+  });
+</script>
+</body>
+</html>

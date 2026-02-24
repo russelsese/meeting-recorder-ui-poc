@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VoiceInsight — Calendar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#f0f4ff', 100:'#dce8ff', 500:'#4169e1', 600:'#3457c8', 700:'#2a45a8' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #app {
+      width: 100%;
+      max-width: 390px;
+      height: 100vh;
+      background: #f9fafb;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 390px) {
+      #app { box-shadow: none; }
+      body { background: #f9fafb; }
+    }
+    #cal-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #cal-scroll::-webkit-scrollbar { display: none; }
+    .recording-row { transition: background 0.1s; cursor: pointer; }
+    .recording-row:active { background: #f0f4ff; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Status bar -->
+  <div class="h-10 bg-white flex-shrink-0"></div>
+
+  <!-- Header -->
+  <div class="bg-white flex items-center px-4 pb-3 flex-shrink-0 border-b border-gray-100">
+    <a href="dashboard.html" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 -ml-1 mr-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="flex-1">
+      <h1 class="text-base font-semibold text-gray-800 leading-tight">Activity Calendar</h1>
+      <p class="text-xs text-gray-400">Last 7 days</p>
+    </div>
+    <!-- Summary badge -->
+    <div class="flex flex-col items-end mr-2">
+      <span class="text-xs font-bold text-brand-500" id="total-count">12 recordings</span>
+      <span class="text-xs text-gray-400" id="total-duration">this week</span>
+    </div>
+    <a href="settings.html" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 -ml-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Calendar list -->
+  <div id="cal-scroll" class="px-4 pt-4 pb-6 space-y-4">
+    <!-- Rendered by JS -->
+  </div>
+
+</div>
+
+<script>
+  // Mock data for last 7 days
+  const days = [
+    {
+      label: 'Today',
+      date: 'Mon, 24 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-001',
+          title: 'Team Standup',
+          time: '2:34 PM',
+          duration: 165,
+          preview: 'Discussed sprint progress and upcoming deliverables.',
+          keyPoints: 5
+        },
+        {
+          id: 'rec-002',
+          title: 'Client Call',
+          time: '11:00 AM',
+          duration: 892,
+          preview: 'Q1 budget review and project timeline discussion.',
+          keyPoints: 8
+        }
+      ]
+    },
+    {
+      label: 'Yesterday',
+      date: 'Sun, 23 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-003',
+          title: 'One-on-One',
+          time: '3:45 PM',
+          duration: 478,
+          preview: 'Career development and performance feedback.',
+          keyPoints: 4
+        },
+        {
+          id: 'rec-004',
+          title: 'Planning Session',
+          time: '10:30 AM',
+          duration: 1254,
+          preview: 'Q2 roadmap and team priorities discussion.',
+          keyPoints: 6
+        }
+      ]
+    },
+    {
+      label: 'Sat, 22 Feb',
+      date: 'Sat, 22 Feb 2026',
+      recordings: []
+    },
+    {
+      label: 'Fri, 21 Feb',
+      date: 'Fri, 21 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-005',
+          title: 'Weekly Review',
+          time: '4:00 PM',
+          duration: 623,
+          preview: 'Week wrap-up and lessons learned.',
+          keyPoints: 5
+        }
+      ]
+    },
+    {
+      label: 'Thu, 20 Feb',
+      date: 'Thu, 20 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-006',
+          title: 'Team Sync',
+          time: '2:15 PM',
+          duration: 345,
+          preview: 'Status updates and blockers.',
+          keyPoints: 3
+        }
+      ]
+    },
+    {
+      label: 'Wed, 19 Feb',
+      date: 'Wed, 19 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-007',
+          title: 'All Hands Meeting',
+          time: '10:00 AM',
+          duration: 1842,
+          preview: 'Company updates and announcements.',
+          keyPoints: 7
+        }
+      ]
+    },
+    {
+      label: 'Tue, 18 Feb',
+      date: 'Tue, 18 Feb 2026',
+      recordings: [
+        {
+          id: 'rec-008',
+          title: 'Workshop',
+          time: '1:30 PM',
+          duration: 2156,
+          preview: 'Technical deep-dive and best practices.',
+          keyPoints: 9
+        }
+      ]
+    }
+  ];
+
+  // Format duration
+  function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // Calculate stats
+  function calculateStats() {
+    let totalRecordings = 0;
+    let totalSeconds = 0;
+
+    days.forEach(day => {
+      totalRecordings += day.recordings.length;
+      day.recordings.forEach(rec => {
+        totalSeconds += rec.duration;
+      });
+    });
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+
+    document.getElementById('total-count').textContent = `${totalRecordings} recordings`;
+    document.getElementById('total-duration').textContent = `${hours}h ${mins}m total`;
+  }
+
+  // Render calendar
+  const calScroll = document.getElementById('cal-scroll');
+
+  days.forEach(day => {
+    const section = document.createElement('div');
+
+    // Day header
+    const header = document.createElement('div');
+    header.className = 'flex items-center gap-3 mb-2';
+    header.innerHTML = `
+      <span class="text-xs font-bold ${day.label === 'Today' ? 'text-brand-500' : 'text-gray-500'} uppercase tracking-widest">${day.label}</span>
+      <span class="text-xs text-gray-300">${day.date}</span>
+      ${day.recordings.length > 0 ? `<span class="ml-auto text-xs text-gray-400">${day.recordings.length} recording${day.recordings.length !== 1 ? 's' : ''}</span>` : ''}
+    `;
+    section.appendChild(header);
+
+    if (day.recordings.length === 0) {
+      // No activity
+      const empty = document.createElement('div');
+      empty.className = 'flex items-center gap-2 bg-white rounded-2xl px-4 py-3 border border-gray-100';
+      empty.innerHTML = `
+        <div class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </div>
+        <p class="text-xs text-gray-400">No recordings</p>
+      `;
+      section.appendChild(empty);
+    } else {
+      const recordingList = document.createElement('div');
+      recordingList.className = 'space-y-2';
+
+      day.recordings.forEach(rec => {
+        const row = document.createElement('a');
+        row.href = `recording-detail.html?id=${rec.id}`;
+        row.className = 'recording-row flex items-start gap-3 bg-white rounded-2xl px-4 py-3.5 shadow-sm border border-gray-100 block';
+        row.innerHTML = `
+          <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 text-brand-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-semibold text-gray-800">${rec.title}</p>
+              <span class="text-xs bg-brand-50 text-brand-600 font-medium px-2 py-0.5 rounded-full flex-shrink-0">${formatDuration(rec.duration)}</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-1">${rec.time}</p>
+            <p class="text-xs text-gray-600 line-clamp-1">${rec.preview}</p>
+            <p class="text-xs text-brand-500 font-medium mt-1">${rec.keyPoints} key points</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        `;
+        recordingList.appendChild(row);
+      });
+
+      section.appendChild(recordingList);
+    }
+
+    calScroll.appendChild(section);
+  });
+
+  // Calculate and display stats
+  calculateStats();
+</script>
+</body>
+</html>

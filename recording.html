@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VoiceInsight — Record</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#f0f4ff', 100:'#dce8ff', 500:'#4169e1', 600:'#3457c8', 700:'#2a45a8' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #app {
+      width: 100%;
+      max-width: 390px;
+      height: 100vh;
+      background: #f9fafb;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 390px) {
+      #app { box-shadow: none; }
+      body { background: #f9fafb; }
+    }
+
+    /* Recording button animation */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    #record-btn.recording { animation: pulse 1.5s ease-in-out infinite; }
+
+    /* Waveform bars */
+    .wave-bar {
+      flex: 1;
+      background: #4169e1;
+      border-radius: 2px;
+      animation: waveMove 0.6s ease-in-out infinite;
+      min-height: 4px;
+    }
+    .wave-bar:nth-child(1) { animation-delay: -0.5s; }
+    .wave-bar:nth-child(2) { animation-delay: -0.4s; }
+    .wave-bar:nth-child(3) { animation-delay: -0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: -0.2s; }
+    .wave-bar:nth-child(5) { animation-delay: -0.1s; }
+    .wave-bar:nth-child(6) { animation-delay: 0s; }
+    .wave-bar:nth-child(7) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(8) { animation-delay: 0.2s; }
+
+    @keyframes waveMove {
+      0%, 100% { height: 8px; opacity: 0.6; }
+      50% { height: 32px; opacity: 1; }
+    }
+
+    .hidden-waveform .wave-bar { animation: none !important; height: 8px !important; }
+
+    /* Title input styling */
+    #recording-title:focus { outline: none; border-color: #4169e1; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Status bar spacer -->
+  <div class="h-10 bg-white flex-shrink-0"></div>
+
+  <!-- Top nav -->
+  <div class="bg-white flex items-center px-4 pb-3 flex-shrink-0 border-b border-gray-100">
+    <a href="dashboard.html" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 -ml-1 mr-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="flex-1">
+      <h1 class="text-base font-semibold text-gray-800 leading-tight">New Recording</h1>
+      <p class="text-xs text-gray-400">Record a conversation or meeting</p>
+    </div>
+    <a href="settings.html" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 -ml-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Title input section -->
+  <div class="bg-white border-b border-gray-100 px-4 py-3 flex-shrink-0">
+    <input id="recording-title" type="text"
+      placeholder="Meeting - Feb 24, 2:34 PM"
+      class="w-full bg-transparent text-base font-semibold text-brand-600 border-b-2 border-gray-200 pb-1 placeholder-gray-300" />
+  </div>
+
+  <!-- Main recording area (centered) -->
+  <div class="flex-1 flex flex-col items-center justify-center px-6 pb-16">
+
+    <!-- Timer display -->
+    <div class="text-6xl font-bold text-gray-800 font-mono mb-8" id="timer">00:00</div>
+
+    <!-- Waveform visualization -->
+    <div id="waveform" class="flex items-center justify-center gap-1 h-16 mb-12 hidden-waveform">
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+    </div>
+
+    <!-- Large record button -->
+    <button id="record-btn"
+      onclick="toggleRecording()"
+      class="flex items-center justify-center w-32 h-32 rounded-full bg-brand-500 text-white shadow-lg active:scale-95 transition-transform mb-8">
+      <svg id="record-icon" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+        <path d="M19 10.75A6.002 6.002 0 0012 20a6 6 0 01-6-6v-.5a1 1 0 112 0v.5a4 4 0 008 0v-1.25a1 1 0 112 0V14a8 8 0 01-8 8 8.006 8.006 0 01-7.73-5.5"/>
+      </svg>
+    </button>
+
+    <!-- Status label -->
+    <p id="status-label" class="text-sm text-gray-600 font-medium">Tap to start recording</p>
+
+  </div>
+
+  <!-- Bottom action buttons (shown when recording stopped) -->
+  <div id="bottom-actions" class="hidden absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-4 pb-8 flex gap-3">
+    <button onclick="discardRecording()"
+      class="flex-1 border border-gray-200 text-gray-600 font-semibold text-sm py-4 rounded-2xl active:scale-95 transition-transform">
+      Discard
+    </button>
+    <button onclick="saveRecording()"
+      class="flex-1 bg-brand-500 text-white font-semibold text-sm py-4 rounded-2xl shadow active:scale-95 transition-transform">
+      Save & Process
+    </button>
+  </div>
+
+</div>
+
+<script>
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recordingStartTime = 0;
+  let timerInterval = null;
+  let isRecording = false;
+  let isPaused = false;
+
+  const recordBtn = document.getElementById('record-btn');
+  const statusLabel = document.getElementById('status-label');
+  const timerEl = document.getElementById('timer');
+  const bottomActions = document.getElementById('bottom-actions');
+  const waveform = document.getElementById('waveform');
+  const recordIcon = document.getElementById('record-icon');
+  const titleInput = document.getElementById('recording-title');
+
+  // Initialize recording
+  async function initRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        clearInterval(timerInterval);
+      };
+
+      return true;
+    } catch (error) {
+      alert('Microphone access denied. Please enable microphone permissions.');
+      return false;
+    }
+  }
+
+  // Toggle recording on/off
+  async function toggleRecording() {
+    if (!isRecording) {
+      // Start recording
+      const initialized = await initRecording();
+      if (!initialized) return;
+
+      mediaRecorder.start();
+      isRecording = true;
+      recordingStartTime = Date.now();
+
+      // Update UI
+      recordBtn.classList.add('recording');
+      recordBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+      statusLabel.textContent = 'Recording...';
+      statusLabel.style.color = '#ef4444';
+      waveform.classList.remove('hidden-waveform');
+      bottomActions.classList.add('hidden');
+      titleInput.disabled = true;
+
+      // Start timer
+      startTimer();
+    } else if (!isPaused) {
+      // Pause recording
+      mediaRecorder.pause();
+      isPaused = true;
+      clearInterval(timerInterval);
+
+      // Update UI
+      recordBtn.classList.remove('recording');
+      recordBtn.style.background = '#3b82f6';
+      statusLabel.textContent = 'Paused';
+      statusLabel.style.color = '#3b82f6';
+      waveform.classList.add('hidden-waveform');
+      recordIcon.innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
+    } else {
+      // Resume recording
+      mediaRecorder.resume();
+      isPaused = false;
+
+      // Update UI
+      recordBtn.classList.add('recording');
+      recordBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+      statusLabel.textContent = 'Recording...';
+      statusLabel.style.color = '#ef4444';
+      waveform.classList.remove('hidden-waveform');
+      recordIcon.innerHTML = '<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10.75A6.002 6.002 0 0012 20a6 6 0 01-6-6v-.5a1 1 0 112 0v.5a4 4 0 008 0v-1.25a1 1 0 112 0V14a8 8 0 01-8 8 8.006 8.006 0 01-7.73-5.5"/>';
+
+      // Resume timer
+      startTimer();
+    }
+  }
+
+  // Timer function
+  function startTimer() {
+    const startTime = Date.now() - (parseInt(timerEl.textContent.split(':')[0]) * 60 + parseInt(timerEl.textContent.split(':')[1])) * 1000;
+    timerInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 100);
+  }
+
+  // Discard recording
+  function discardRecording() {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+    }
+    isRecording = false;
+    isPaused = false;
+    audioChunks = [];
+    timerEl.textContent = '00:00';
+    recordBtn.classList.remove('recording');
+    recordBtn.style.background = '#4169e1';
+    statusLabel.textContent = 'Tap to start recording';
+    statusLabel.style.color = '#4b5563';
+    waveform.classList.add('hidden-waveform');
+    bottomActions.classList.add('hidden');
+    titleInput.disabled = false;
+    recordIcon.innerHTML = '<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10.75A6.002 6.002 0 0012 20a6 6 0 01-6-6v-.5a1 1 0 112 0v.5a4 4 0 008 0v-1.25a1 1 0 112 0V14a8 8 0 01-8 8 8.006 8.006 0 01-7.73-5.5"/>';
+  }
+
+  // Save recording
+  function saveRecording() {
+    if (mediaRecorder && (isRecording || isPaused)) {
+      mediaRecorder.stop();
+      isRecording = false;
+      isPaused = false;
+
+      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const duration = timerEl.textContent;
+      const title = titleInput.value || 'Untitled Recording';
+
+      // Save to localStorage (simple mock)
+      const recording = {
+        id: 'rec-' + Date.now(),
+        title: title,
+        duration: parseInt(timerEl.textContent.split(':')[0]) * 60 + parseInt(timerEl.textContent.split(':')[1]),
+        audioUrl: audioUrl,
+        date: new Date().toLocaleString(),
+        transcript: { text: 'This is a mock transcript...', segments: [] },
+        summary: 'This recording contains important discussion points and action items.',
+        keyPoints: [
+          'Action Item 1: Follow up by Friday',
+          'Topic: Discussed budget planning',
+          'Decision: Approved new tools purchase',
+          'Discussed team expansion',
+          'Mentioned next quarter goals'
+        ]
+      };
+
+      // Store in sessionStorage for demo (reload will lose it, but for this POC it's fine)
+      sessionStorage.setItem(recording.id, JSON.stringify(recording));
+
+      // Show processing message
+      bottomActions.classList.add('hidden');
+      statusLabel.textContent = 'Processing with AI...';
+      statusLabel.style.color = '#4b5563';
+      recordBtn.disabled = true;
+      recordBtn.style.opacity = '0.5';
+
+      // Simulate processing delay
+      setTimeout(() => {
+        window.location.href = `recording-detail.html?id=${recording.id}`;
+      }, 2000);
+    }
+  }
+
+  // Show bottom actions after recording stops
+  document.addEventListener('click', (e) => {
+    if (isRecording && !e.target.closest('#record-btn')) return;
+
+    if (isPaused || (mediaRecorder && !isRecording && audioChunks.length > 0)) {
+      bottomActions.classList.remove('hidden');
+    }
+  });
+
+  // Allow stopping recording by long-pressing button
+  recordBtn.addEventListener('touchstart', () => {
+    if (isRecording || isPaused) {
+      setTimeout(() => {
+        if (isRecording || isPaused) {
+          if (mediaRecorder) {
+            mediaRecorder.stop();
+          }
+          isRecording = false;
+          isPaused = false;
+          recordBtn.classList.remove('recording');
+          recordBtn.style.background = '#4169e1';
+          statusLabel.textContent = 'Stopped';
+          waveform.classList.add('hidden-waveform');
+          bottomActions.classList.remove('hidden');
+          titleInput.disabled = false;
+          recordIcon.innerHTML = '<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10.75A6.002 6.002 0 0012 20a6 6 0 01-6-6v-.5a1 1 0 112 0v.5a4 4 0 008 0v-1.25a1 1 0 112 0V14a8 8 0 01-8 8 8.006 8.006 0 01-7.73-5.5"/>';
+          clearInterval(timerInterval);
+        }
+      }, 500);
+    }
+  });
+</script>
+</body>
+</html>
