@@ -4,7 +4,7 @@ A mobile-first HTML proof-of-concept for **VoiceInsight**, an AI-powered voice r
 
 ## Live Demo
 
-**View the live demo:** https://russelsese.github.io/meeting-recorder-ui-poc/
+**View the live demo:** [https://russelsese.github.io/meeting-recorder-ui-poc/](https://russelsese.github.io/voice-insight-ui-poc/)
 
 Or open `index.html` in your browser locally to navigate through all screens:
 
